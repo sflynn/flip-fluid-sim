@@ -243,7 +243,7 @@ OP_ERROR SOP_Flipsim::cookMySop(OP_Context &context)
 {
     fpreal t = context.getTime();
     size_t frame = (size_t)(t * 24.0) + 1;
-    OP_Node::flags().timeDep = 1;
+    OP_Node::flags().setTimeDep(true);
 
     initSystem();
     
