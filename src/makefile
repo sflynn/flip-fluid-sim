@@ -18,7 +18,7 @@ SOURCES = \
     ./simulator.C
 
 #change this to your houdini dso folder
-INSTDIR = ~/houdini16.5/dso
+INSTDIR = ~/houdini18.0
 
 # Additional include directories.
 #INCDIRS = \
