@@ -50,27 +50,29 @@ void Simulator::simulate_flip_to_frame(size_t frame)
         particle_positions = _particle_positions_[f];
         particle_velocities = _particle_velocities_[f];
 
-        while(cur_time < f + 1)
-        {
-            max_u = grid.max_u();
-            ts = grid.voxel_size() / max_u;
-            ts = min(f + 1 - cur_time, ts);
+        if (particle_positions.size() > 0 && particle_velocities.size() > 0) {
+            while(cur_time < f + 1)
+            {
+                max_u = grid.max_u();
+                ts = grid.voxel_size() / max_u;
+                ts = min(f + 1 - cur_time, ts);
 
-            grid.advect_particles(particle_positions, ts);
-            grid.enforce_particle_bounds(particle_positions, particle_velocities);
-            grid.compute_sdf(particle_positions);
-            grid.update_buffer(1, particle_positions);
-            apply_gravity_to_particles(particle_velocities, ts);
-            grid.pvel_to_grid(particle_positions, particle_velocities);
-            grid.set_boundary_velocities();
-            grid.extrapolate_velocity(4);
-            grid.set_boundary_velocities();
-            grid.pressure_projection(FLUID_DENSITY, _st_const_, ts);
-            grid.extrapolate_velocity(4);
-            grid.set_boundary_velocities();
-            grid.grid_to_pvel(particle_positions, particle_velocities, _flip_ratio_);
+                grid.advect_particles(particle_positions, ts);
+                grid.enforce_particle_bounds(particle_positions, particle_velocities);
+                grid.compute_sdf(particle_positions);
+                grid.update_buffer(1, particle_positions);
+                apply_gravity_to_particles(particle_velocities, ts);
+                grid.pvel_to_grid(particle_positions, particle_velocities);
+                grid.set_boundary_velocities();
+                grid.extrapolate_velocity(4);
+                grid.set_boundary_velocities();
+                grid.pressure_projection(FLUID_DENSITY, _st_const_, ts);
+                grid.extrapolate_velocity(4);
+                grid.set_boundary_velocities();
+                grid.grid_to_pvel(particle_positions, particle_velocities, _flip_ratio_);
 
-            cur_time += ts;
+                cur_time += ts;
+            }
         }
         _grids_.emplace_back(std::move(grid));
         _particle_positions_.push_back(particle_positions);
