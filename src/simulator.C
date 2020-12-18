@@ -19,9 +19,8 @@ Simulator::Simulator(MacGrid *grid, const UT_Vector3 gravity, const double st_co
     _gravity_(gravity), _st_const_(st_const), _flip_ratio_(flip_ratio)
 {
     _grids_.push_back(grid);
-    vector<UT_Vector3> temp0, temp1, temp2, temp3, temp4;
-    _particle_positions_.push_back(temp0);
-    _particle_velocities_.push_back(temp1);
+    _particle_positions_.emplace_back();
+    _particle_velocities_.emplace_back();
 
     UT_Vector3 init_vel1(fRand(-2.0, 2.0), fRand(-2.0, 2.0), 0.0);
     fill_box_with_particles(12, 18, 22, 28, 0, 0, init_vel1, 0);
