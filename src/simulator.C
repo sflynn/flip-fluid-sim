@@ -53,8 +53,8 @@ void Simulator::simulate_flip_to_frame(const size_t frame)
     for(size_t f = start_frame; f < end_frame; f++)
     {
         grid = new MacGrid(*(_grids_[f]));
-        particle_positions = copy_particles(_particle_positions_[f]);
-        particle_velocities = copy_particles(_particle_velocities_[f]);
+        particle_positions = _particle_positions_[f];
+        particle_velocities = _particle_velocities_[f];
 
         while(cur_time < f + 1)
         {
@@ -93,22 +93,6 @@ void Simulator::apply_gravity_to_particles(vector<UT_Vector3>& particle_velociti
         for(size_t dim = 0; dim < 3; dim++)
             particle_velocities[p][dim] += _gravity_[dim] * t;
     }
-}
-
-//Copies the provided particles. This is useful for creating a copy to cache.
-vector<UT_Vector3> Simulator::copy_particles(const vector<UT_Vector3>& particles) const
-{
-    vector<UT_Vector3> new_particles;
-    for(size_t i = 0; i < particles.size(); i++)
-    {
-        UT_Vector3 pos;
-        pos[0] = particles[i][0];
-        pos[1] = particles[i][1];
-        pos[2] = particles[i][2];
-        new_particles.push_back(pos);
-    }
-
-    return new_particles;
 }
 
 //Adds a particle to the specified simulation frame with the provided position and velocity.

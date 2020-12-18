@@ -86,14 +86,6 @@ public:
     void apply_gravity_to_particles(vector<UT_Vector3>& particle_velocities, const double t) const;
 
     /**
-    * Copies the provided particles. This is useful for creating a copy to cache.
-    *
-    * @param particles The particles to copy.
-    * @return The copied particles.
-    */
-    vector<UT_Vector3> copy_particles(const vector<UT_Vector3>& particles) const;
-
-    /**
     * Adds a particle to the specified simulation frame with the provided position and velocity.
     *
     * @param px The x position of the particle in world units.
