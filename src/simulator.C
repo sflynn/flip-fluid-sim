@@ -16,8 +16,8 @@ const double EPSILON = .00001;
 const double FLUID_DENSITY = 1.0;
 
 //Constructs a Simulator object.
-Simulator::Simulator(MacGrid *grid, const UT_Vector3 gravity, const double st_const,
-                     const double flip_ratio) : 
+Simulator::Simulator(MacGrid *grid, UT_Vector3 gravity, double st_const,
+                     double flip_ratio) : 
     _gravity_(gravity), _st_const_(st_const), _flip_ratio_(flip_ratio)
 {
     _grids_.push_back(grid);
@@ -39,7 +39,7 @@ Simulator::~Simulator()
 
 //Simulates and caches the FLIP fluid up until the specified frame or returns if the simulation
 //is already cached to that frame.
-void Simulator::simulate_flip_to_frame(const size_t frame)
+void Simulator::simulate_flip_to_frame(size_t frame)
 {
     if(frame < _grids_.size())
         return;
@@ -88,7 +88,7 @@ void Simulator::simulate_flip_to_frame(const size_t frame)
 
 //Adds the gravity constant to the provided particle velocities.
 void Simulator::apply_gravity_to_particles(vector<UT_Vector3>& particle_velocities,
-                                           const double t) const
+                                           double t) const
 {
     for(size_t p = 0; p < particle_velocities.size(); p++)
     {
@@ -98,8 +98,8 @@ void Simulator::apply_gravity_to_particles(vector<UT_Vector3>& particle_velociti
 }
 
 //Adds a particle to the specified simulation frame with the provided position and velocity.
-void Simulator::add_particle(const double px, const double py, const double pz,
-                             const double ux, const double uy, const double uz, const size_t frame)
+void Simulator::add_particle(double px, double py, double pz,
+                             double ux, double uy, double uz, size_t frame)
 {
     _particle_positions_[frame].push_back(UT_Vector3(px, py, pz));
     _particle_velocities_[frame].push_back(UT_Vector3(ux, uy, uz));
@@ -107,10 +107,10 @@ void Simulator::add_particle(const double px, const double py, const double pz,
 
 //Creates a box of particles at the specified simulation frame with the provided position,
 //dimensions, and initial velocity.
-void Simulator::fill_box_with_particles(const size_t min_x, const size_t max_x,
-                                        const size_t min_y, const size_t max_y,
-                                        const double rand_min, const double rand_max,
-                                        const UT_Vector3& init_vel, const size_t frame)
+void Simulator::fill_box_with_particles(size_t min_x, size_t max_x,
+                                        size_t min_y, size_t max_y,
+                                        double rand_min, double rand_max,
+                                        UT_Vector3& init_vel, size_t frame)
 {
     //TODO--make this dependent on the voxel size rather than hard coded to a voxel size of 1
     double offset =  .25;

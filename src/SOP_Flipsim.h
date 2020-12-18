@@ -141,58 +141,58 @@ private:
     /**
     * Draws the fluid particles being simulated.
     */
-    void _draw_fluid_particles(const size_t frame);
+    void _draw_fluid_particles(size_t frame);
 
     /**
     * Draws circles around fluid particles.
     */
-    void _draw_fluid_circles(const size_t frame);
+    void _draw_fluid_circles(size_t frame);
 
     /**
     * Draws fluid velocity vectors.
     */
-     void _draw_fluid_velocities(const size_t frame);
+     void _draw_fluid_velocities(size_t frame);
 
     /**
     * Draws particles that show interpolated values on the MacGrid.
     */
-    void _draw_interp_particles(const int cell_type, const ScalarType type, const size_t frame);
+    void _draw_interp_particles(int cell_type, ScalarType type, size_t frame);
 
     /**
     * Draws vectors that show interpolated values on the MacGrid.
     */
-    void _draw_interp_vectors(const int cell_type, const ScalarType type, const size_t frame);
+    void _draw_interp_vectors(int cell_type, ScalarType type, size_t frame);
 
     /**
     * Draws the visualizations for this FLIP simulation
     */
-    void _draw_viz(const size_t frame);
+    void _draw_viz(size_t frame);
 
     /**
     * Draws a circle with the given parameters.
     */
-    GEO_PrimPoly * _draw_circle(const fpreal x, const fpreal y, const fpreal z,
-                                const fpreal radius, const fpreal r, const fpreal g,
-                                const fpreal b);
+    GEO_PrimPoly * _draw_circle(fpreal x, fpreal y, fpreal z,
+                                fpreal radius, fpreal r, fpreal g,
+                                fpreal b);
 
     /**
     * Draws a cube with the given parameters.
     */
-    GEO_PrimPoly * _draw_cube(const fpreal x, const fpreal y, const fpreal z, const fpreal size,
-                              const fpreal r, const fpreal g, const fpreal b, const bool filled);
+    GEO_PrimPoly * _draw_cube(fpreal x, fpreal y, fpreal z, fpreal size,
+                              fpreal r, fpreal g, fpreal b, bool filled);
 
     /**
     * Draws a box with the given parameters.
     */
-    GEO_PrimPoly * _draw_box(const fpreal x, const fpreal y, const fpreal z,
-                             const fpreal sx, const fpreal sy, const fpreal sz,
-                             const fpreal r, const fpreal g, const fpreal b, const bool filled);
+    GEO_PrimPoly * _draw_box(fpreal x, fpreal y, fpreal z,
+                             fpreal sx, fpreal sy, fpreal sz,
+                             fpreal r, fpreal g, fpreal b, bool filled);
 
     /**
     * Draws a vector with the given parameters.
     */
-    GEO_PrimPoly * _draw_vector(const fpreal px, const fpreal py, const fpreal pz,
-                                const fpreal vx, const fpreal vy, const fpreal vz);
+    GEO_PrimPoly * _draw_vector(fpreal px, fpreal py, fpreal pz,
+                                fpreal vx, fpreal vy, fpreal vz);
 
     /**
     * Deletes the polygons in this SOP_Node

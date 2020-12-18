@@ -366,7 +366,7 @@ void SOP_Flipsim::_reset_simulator(void)
 }
 
 //Draws the fluid particles being simulated.
-void SOP_Flipsim::_draw_fluid_particles(const size_t frame)
+void SOP_Flipsim::_draw_fluid_particles(size_t frame)
 {
     vector<UT_Vector3> particle_positions = _simulator_->get_particle_positions(frame);
     GA_RWHandleV3 colorh(gdp->findDiffuseAttribute(GA_ATTRIB_POINT));
@@ -388,7 +388,7 @@ void SOP_Flipsim::_draw_fluid_particles(const size_t frame)
 }
 
 //Draws circles around fluid particles.
-void SOP_Flipsim::_draw_fluid_circles(const size_t frame)
+void SOP_Flipsim::_draw_fluid_circles(size_t frame)
 {
     vector<UT_Vector3> particle_positions = _simulator_->get_particle_positions(frame);
     GA_RWHandleV3 colorh(gdp->findDiffuseAttribute(GA_ATTRIB_POINT));
@@ -409,7 +409,7 @@ void SOP_Flipsim::_draw_fluid_circles(const size_t frame)
 }
 
 //Draws fluid velocity vectors.
-void SOP_Flipsim::_draw_fluid_velocities(const size_t frame)
+void SOP_Flipsim::_draw_fluid_velocities(size_t frame)
 {
     vector<UT_Vector3> particle_positions = _simulator_->get_particle_positions(frame);
     vector<UT_Vector3> particle_velocities = _simulator_->get_particle_velocities(frame);
@@ -430,8 +430,8 @@ void SOP_Flipsim::_draw_fluid_velocities(const size_t frame)
 }
 
 //Draws particles that show interpolated values on the MacGrid.
-void SOP_Flipsim::_draw_interp_particles(const int cell_type, const ScalarType type,
-                                         const size_t frame)
+void SOP_Flipsim::_draw_interp_particles(int cell_type, ScalarType type,
+                                         size_t frame)
 {
     GA_RWHandleV3 colorh(gdp->findDiffuseAttribute(GA_ATTRIB_POINT));
     if(_ip_count_ > 0)
@@ -529,8 +529,8 @@ void SOP_Flipsim::_draw_interp_particles(const int cell_type, const ScalarType t
 }
 
 //Draws vectors that show interpolated values on the MacGrid.
-void SOP_Flipsim::_draw_interp_vectors(const int cell_type, const ScalarType type,
-                                       const size_t frame)
+void SOP_Flipsim::_draw_interp_vectors(int cell_type, ScalarType type,
+                                       size_t frame)
 {
     UT_Vector3 pos, clr, u;
     double sd;
@@ -584,7 +584,7 @@ void SOP_Flipsim::_draw_interp_vectors(const int cell_type, const ScalarType typ
 }
 
 //Draws the visualizations for this FLIP simulation.
-void SOP_Flipsim::_draw_viz(const size_t frame)
+void SOP_Flipsim::_draw_viz(size_t frame)
 {
     int show_cells = SHOWGRIDCELLS();
     if(!show_cells)
@@ -686,9 +686,9 @@ void SOP_Flipsim::_draw_viz(const size_t frame)
 }
 
 //Draws a circle with the given parameters.
-GEO_PrimPoly * SOP_Flipsim::_draw_circle(const fpreal x, const fpreal y, const fpreal z,
-                                         const fpreal radius, const fpreal r, const fpreal g,
-                                         const fpreal b)
+GEO_PrimPoly * SOP_Flipsim::_draw_circle(fpreal x, fpreal y, fpreal z,
+                                         fpreal radius, fpreal r, fpreal g,
+                                         fpreal b)
 {
     GA_RWHandleV3 colorh(gdp->findDiffuseAttribute(GA_ATTRIB_POINT));
     if (!colorh.isValid())
@@ -725,8 +725,8 @@ GEO_PrimPoly * SOP_Flipsim::_draw_circle(const fpreal x, const fpreal y, const f
 }
 
 //Draws a vector with the given parameters.
-GEO_PrimPoly * SOP_Flipsim::_draw_vector(const fpreal px, const fpreal py, const fpreal pz,
-                                         const fpreal vx, const fpreal vy, const fpreal vz)
+GEO_PrimPoly * SOP_Flipsim::_draw_vector(fpreal px, fpreal py, fpreal pz,
+                                         fpreal vx, fpreal vy, fpreal vz)
 {
     GA_RWHandleV3 colorh(gdp->findDiffuseAttribute(GA_ATTRIB_POINT));
     if (!colorh.isValid())
@@ -784,18 +784,18 @@ GEO_PrimPoly * SOP_Flipsim::_draw_vector(const fpreal px, const fpreal py, const
 }
 
 //Draws a cube with the given parameters.
-GEO_PrimPoly * SOP_Flipsim::_draw_cube(const fpreal x, const fpreal y, const fpreal z,
-                                       const fpreal size, const fpreal r, const fpreal g,
-                                       const fpreal b, const bool filled)
+GEO_PrimPoly * SOP_Flipsim::_draw_cube(fpreal x, fpreal y, fpreal z,
+                                       fpreal size, fpreal r, fpreal g,
+                                       fpreal b, bool filled)
 {
     return _draw_box(x, y, z, size, size, size, r, g, b, filled);
 }
 
 //Draws a box with the given parameters.
-GEO_PrimPoly * SOP_Flipsim::_draw_box(const fpreal x, const fpreal y, const fpreal z,
-                                      const fpreal sx, const fpreal sy, const fpreal sz,
-                                      const fpreal r, const fpreal g, const fpreal b,
-                                      const bool filled)
+GEO_PrimPoly * SOP_Flipsim::_draw_box(fpreal x, fpreal y, fpreal z,
+                                      fpreal sx, fpreal sy, fpreal sz,
+                                      fpreal r, fpreal g, fpreal b,
+                                      bool filled)
 {
     GA_RWHandleV3 colorh(gdp->findDiffuseAttribute(GA_ATTRIB_POINT));
     if (!colorh.isValid())

@@ -35,7 +35,7 @@ public:
     * @param st_const The surface tension constant.
     * @param flip_ration The flip to pic ratio.
     */
-    Simulator(MacGrid *grid, const UT_Vector3 gravity, const double st_const, const double flip_ratio);
+    Simulator(MacGrid *grid, UT_Vector3 gravity, double st_const, double flip_ratio);
 
     /**
     * Deletes this Simulator and any associated data.
@@ -73,7 +73,7 @@ public:
     *
     * @param frame The frame to simulate up until.
     */
-    void simulate_flip_to_frame(const size_t frame);
+    void simulate_flip_to_frame(size_t frame);
 
     /**
     * Adds the gravity constant to the provided particle velocities.
@@ -81,7 +81,7 @@ public:
     * @param[out] particle_velocities The particle velocities to modify by adding gravity.
     * @param t The timestep.
     */
-    void apply_gravity_to_particles(std::vector<UT_Vector3>& particle_velocities, const double t) const;
+    void apply_gravity_to_particles(std::vector<UT_Vector3>& particle_velocities, double t) const;
 
     /**
     * Adds a particle to the specified simulation frame with the provided position and velocity.
@@ -96,8 +96,8 @@ public:
     *   so the z velocity will be ignored.
     * @param frame The simulation frame to add the particle to.
     */
-    void add_particle(const double px, const double py, const double pz,
-                      const double ux, const double uy, const double uz, const size_t frame);
+    void add_particle(double px, double py, double pz,
+                      double ux, double uy, double uz, size_t frame);
 
     /**
     * Creates a box particles at the specified simulation frame with the provided position,
@@ -112,10 +112,10 @@ public:
     * @param init_vel The initial velocity of the particles in the box.
     * @param frame The simulation frame to add the particles to.
     */
-    void fill_box_with_particles(const size_t min_x, const size_t max_x,
-                                 const size_t min_y, const size_t max_y,
-                                 const double rand_min, const double rand_max,
-                                 const UT_Vector3& init_vel, const size_t frame);
+    void fill_box_with_particles(size_t min_x, size_t max_x,
+                                 size_t min_y, size_t max_y,
+                                 double rand_min, double rand_max,
+                                 UT_Vector3& init_vel, size_t frame);
 
 private:
 
