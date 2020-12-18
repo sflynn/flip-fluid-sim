@@ -19,8 +19,6 @@
 
 using namespace std;
 
-class GEO_PrimParticle;
-
 //The types of scalars that can be stored in a MacGrid, allows interpolation code reuse.
 enum ScalarType {UX, UY, UZ, UX_TEMP, UY_TEMP, UZ_TEMP, U, SD, CURV, PRESSURE};
 
