@@ -7,6 +7,8 @@
 
 #include "simulator.h"
 
+using namespace std;
+
 //constants
 const int LARGE_NUMBER = 1000000000;
 const int LARGE_NEG_NUMBER = LARGE_NUMBER * -1;

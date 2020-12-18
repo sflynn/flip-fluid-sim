@@ -17,8 +17,6 @@
 #include <eigen3/Eigen/Sparse>
 #include <SOP/SOP_Node.h>
 
-using namespace std;
-
 //The types of scalars that can be stored in a MacGrid, allows interpolation code reuse.
 enum ScalarType {UX, UY, UZ, UX_TEMP, UY_TEMP, UZ_TEMP, U, SD, CURV, PRESSURE};
 
@@ -170,7 +168,7 @@ public:
     *   with the resulting positions.
     * @param t The timestep.
     */
-    void advect_particles(vector<UT_Vector3>& particles, const double t) const;
+    void advect_particles(std::vector<UT_Vector3>& particles, const double t) const;
 
     /**
     * Applies the specified gravity force uniformly to the fluid cells in the MacGrid.
@@ -199,8 +197,8 @@ public:
     * @param[in,out] p_velocities The velocities of the particles to check. These velocities will
     *   modified if they point into the boundaries.
     */
-    void enforce_particle_bounds(vector<UT_Vector3>& p_positions,
-                                 vector<UT_Vector3>& p_velocities) const;
+    void enforce_particle_bounds(std::vector<UT_Vector3>& p_positions,
+                                 std::vector<UT_Vector3>& p_velocities) const;
 
     /**
     * Sets the velocities at the MacGrid boundaries to zero so that fluid will not flow into the
@@ -222,8 +220,8 @@ public:
     * @param p_positions The positions of the particles.
     * @param p_velocities The velocities of the particles to tranfer to the grid.
     */
-    void pvel_to_grid(const vector<UT_Vector3>& p_positions,
-                      const vector<UT_Vector3>& p_velocities);
+    void pvel_to_grid(const std::vector<UT_Vector3>& p_positions,
+                      const std::vector<UT_Vector3>& p_velocities);
 
     /**
     * Updates the provided particle velocities with the velocity field stored in this MacGrid as
@@ -233,7 +231,8 @@ public:
     * @param[out] p_velocities The particle velocities to be updated.
     * @param flip_ratio The ratio of flip to pic. This affects how inviscid the resulting fluid is.
     */
-    void grid_to_pvel(vector<UT_Vector3>& p_positions, vector<UT_Vector3>& p_velocities,
+    void grid_to_pvel(std::vector<UT_Vector3>& p_positions,
+                      std::vector<UT_Vector3>& p_velocities,
                       double flip_ratio) const;
 
     /**
@@ -244,7 +243,7 @@ public:
     *   fluid cells.
     * @param particles The fluid particles to update the grid with.
     */
-    void update_buffer(const int kcfl, const vector<UT_Vector3>& particles);
+    void update_buffer(const int kcfl, const std::vector<UT_Vector3>& particles);
 
     /**
     * Computes the divergence of the velocity at the given index.
@@ -289,7 +288,7 @@ public:
     *
     * @param The FLIP particle locations that represent the fluid.
     */
-    void compute_sdf(const vector<UT_Vector3>& particles);
+    void compute_sdf(const std::vector<UT_Vector3>& particles);
 
     /**
     * Returns the maximum value of velocity in the MacGrid.

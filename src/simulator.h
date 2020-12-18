@@ -16,8 +16,6 @@
 
 #include "macgrid.h"
 
-using namespace std;
-
 /**
 * This class defines a FLIP fluid simulator. It caches each frame of simulation as it simulates
 * similar to other Houdini simulators. This means that there is a vector of particles and MacGrid
@@ -50,15 +48,15 @@ public:
     UT_Vector3& get_gravity(void) { return _gravity_; }
     double get_st_const(void) { return _st_const_; }
     double get_flip_ratio(void) { return _flip_ratio_; }
-    vector<MacGrid*>& get_grids(void) { return _grids_; }
+    std::vector<MacGrid*>& get_grids(void) { return _grids_; }
     MacGrid* get_grid(void) { return _grids_[_grids_.size() - 1]; }
     MacGrid* get_grid(size_t frame)
         { simulate_flip_to_frame(frame); return _grids_[frame]; }
-    vector<vector<UT_Vector3>>& get_particle_positions(void) { return _particle_positions_; }
-    vector<vector<UT_Vector3>>& get_particle_velocities(void) { return _particle_velocities_; }
-    vector<UT_Vector3>& get_particle_positions(size_t frame)
+    std::vector<std::vector<UT_Vector3>>& get_particle_positions(void) { return _particle_positions_; }
+    std::vector<std::vector<UT_Vector3>>& get_particle_velocities(void) { return _particle_velocities_; }
+    std::vector<UT_Vector3>& get_particle_positions(size_t frame)
         { return _particle_positions_[frame]; }
-    vector<UT_Vector3>& get_particle_velocities(size_t frame)
+    std::vector<UT_Vector3>& get_particle_velocities(size_t frame)
         { return _particle_velocities_[frame]; }
 
     /**
@@ -83,7 +81,7 @@ public:
     * @param[out] particle_velocities The particle velocities to modify by adding gravity.
     * @param t The timestep.
     */
-    void apply_gravity_to_particles(vector<UT_Vector3>& particle_velocities, const double t) const;
+    void apply_gravity_to_particles(std::vector<UT_Vector3>& particle_velocities, const double t) const;
 
     /**
     * Adds a particle to the specified simulation frame with the provided position and velocity.
@@ -127,11 +125,11 @@ private:
     double _flip_ratio_;
 
     //vector of cached simulation grids
-    vector<MacGrid*> _grids_;
+    std::vector<MacGrid*> _grids_;
 
     //vector of cached particles
-    vector<vector<UT_Vector3>> _particle_positions_;
-    vector<vector<UT_Vector3>> _particle_velocities_;
+    std::vector<std::vector<UT_Vector3>> _particle_positions_;
+    std::vector<std::vector<UT_Vector3>> _particle_velocities_;
 };
 
 #endif
