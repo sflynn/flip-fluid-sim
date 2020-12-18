@@ -188,7 +188,7 @@ OP_Node * SOP_Flipsim::myConstructor(OP_Network *net, const char *name, OP_Opera
 //Constructs a SOP_Flipsim object.
 SOP_Flipsim::SOP_Flipsim(OP_Network *net, const char *name, OP_Operator *op)
     : SOP_Node(net, name, op)
-    , _particle_system_(NULL), _simulator_(NULL), _poly_pt_group_(NULL)
+    , _particle_system_(nullptr), _simulator_(nullptr), _poly_pt_group_(nullptr)
 {
     _prev_source_pos_[0] = 0.0;
     _prev_source_pos_[1] = 0.0;
