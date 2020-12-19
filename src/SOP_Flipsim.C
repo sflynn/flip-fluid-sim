@@ -448,7 +448,7 @@ void SOP_Flipsim::_draw_interp_particles(int cell_type, ScalarType type,
     double level_set_thresh = LEVELSETTHRESH();
     double min_sd = INTERPMINSD();
     double max_sd = INTERPMAXSD();
-    MacGrid *grid = _simulator_->get_grid(frame);
+    const MacGrid *grid = _simulator_->get_grid(frame);
 
     for(size_t i = 0; i < _ip_count_; i++)
     {
@@ -538,7 +538,7 @@ void SOP_Flipsim::_draw_interp_vectors(int cell_type, ScalarType type,
     double level_set_thresh = LEVELSETTHRESH();
     double min_sd = INTERPMINSD();
     double max_sd = INTERPMAXSD();
-    MacGrid *grid = _simulator_->get_grid(frame);
+    const MacGrid *grid = _simulator_->get_grid(frame);
     
     for(size_t i = 0; i < _ip_count_; i++)
     {
@@ -595,7 +595,7 @@ void SOP_Flipsim::_draw_viz(size_t frame)
 
     double level_set_thresh = LEVELSETTHRESH();
     double ux, uy;
-    MacGrid *grid = _simulator_->get_grid(frame);
+    const MacGrid *grid = _simulator_->get_grid(frame);
 
     for(size_t j = 0; j < grid->height(); j++)
     {

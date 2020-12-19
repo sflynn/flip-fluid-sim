@@ -45,18 +45,17 @@ public:
     /**
     * Getter methods
     */
-    UT_Vector3& get_gravity(void) { return _gravity_; }
+    const UT_Vector3& get_gravity(void) { return _gravity_; }
     double get_st_const(void) { return _st_const_; }
     double get_flip_ratio(void) { return _flip_ratio_; }
-    std::vector<MacGrid*>& get_grids(void) { return _grids_; }
-    MacGrid* get_grid(void) { return _grids_[_grids_.size() - 1]; }
-    MacGrid* get_grid(size_t frame)
+    const MacGrid* get_grid(void) { return _grids_[_grids_.size() - 1]; }
+    const MacGrid* get_grid(size_t frame)
         { simulate_flip_to_frame(frame); return _grids_[frame]; }
-    std::vector<std::vector<UT_Vector3>>& get_particle_positions(void) { return _particle_positions_; }
-    std::vector<std::vector<UT_Vector3>>& get_particle_velocities(void) { return _particle_velocities_; }
-    std::vector<UT_Vector3>& get_particle_positions(size_t frame)
+    const std::vector<std::vector<UT_Vector3>>& get_particle_positions(void) { return _particle_positions_; }
+    const std::vector<std::vector<UT_Vector3>>& get_particle_velocities(void) { return _particle_velocities_; }
+    const std::vector<UT_Vector3>& get_particle_positions(size_t frame)
         { return _particle_positions_[frame]; }
-    std::vector<UT_Vector3>& get_particle_velocities(size_t frame)
+    const std::vector<UT_Vector3>& get_particle_velocities(size_t frame)
         { return _particle_velocities_[frame]; }
 
     /**
