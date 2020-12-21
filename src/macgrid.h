@@ -58,7 +58,7 @@ public:
     /**
     * Deletes this MacGrid and any associated data.
     */
-    virtual ~MacGrid();
+    virtual ~MacGrid() = default;
 
     /**
     * Getter methods
@@ -233,7 +233,7 @@ public:
     */
     void grid_to_pvel(std::vector<UT_Vector3>& p_positions,
                       std::vector<UT_Vector3>& p_velocities,
-                      double flip_ratio) const;
+                      double flip_ratio);
 
     /**
     * Updates the cell types in this MacGrid to reflect the provided particles including building a
@@ -322,14 +322,14 @@ private:
     int _sdf_sweep_count_;
 
     //fields NOTE--the 3rd dimension in the vectors is unused in this 2D implementation
-    double* _sdf_;
-    double* _pressure_;
-    double* _u_[3];
-    double* _old_u_[3];
-    double* _temp_u_[3];
-    double* _w_[3];
-    int* _layer_;
-    CellType* _type_;
+    std::vector<double> _sdf_;
+    std::vector<double> _pressure_;
+    std::array<std::vector<double>, 3> _u_;
+    std::array<std::vector<double>, 3> _old_u_;
+    std::array<std::vector<double>, 3> _temp_u_;
+    std::array<std::vector<double>, 3> _w_;
+    std::vector<int> _layer_;
+    std::vector<CellType> _type_;
 
     //pressure solve variables
     Eigen::SparseMatrix<double>* _A_;

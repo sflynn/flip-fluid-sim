@@ -25,26 +25,27 @@ double fRand(double fMin, double fMax)
     return fMin + f * (fMax - fMin);
 }
 
+auto array_of_vecs = [] (size_t count) {
+        return std::array<std::vector<double>, 3>{
+                std::vector<double>(count), std::vector<double>(count),
+                std::vector<double>(count) };
+    };
+
+
 //Constructs a MacGrid object.
 MacGrid::MacGrid(size_t width, size_t height, size_t depth,
                  double voxel_size, double particle_radius) :
         _width_(width), _height_(height), _depth_(depth), _total_cells_(width * height * depth),
         _voxel_size_(voxel_size), _half_voxel_size_(voxel_size / 2.0),
         _particle_radius_(particle_radius), _w_to_v_(1.0 / voxel_size),
-        _sdf_sweep_count_((int)ceil(max(width, height) * .7))
+        _sdf_sweep_count_((int)ceil(max(width, height) * .7)),
+        _sdf_(_total_cells_), _pressure_(_total_cells_),
+        _u_(array_of_vecs(_total_cells_)),
+        _old_u_(array_of_vecs(_total_cells_)),
+        _temp_u_(array_of_vecs(_total_cells_)),
+        _w_(array_of_vecs(_total_cells_)),
+        _layer_(_total_cells_), _type_(_total_cells_)
 {
-    _sdf_ = new double[_total_cells_];
-    _pressure_ = new double[_total_cells_];
-    for(size_t dim = 0; dim < 3; dim++)
-    {
-        _u_[dim] = new double[_total_cells_];
-        _temp_u_[dim] = new double[_total_cells_];
-        _old_u_[dim] = new double[_total_cells_];
-        _w_[dim] = new double[_total_cells_];
-    }
-    _layer_ = new int[_total_cells_];
-    _type_ = new CellType[_total_cells_];
-
     _reset_grid();
 }
 
@@ -54,50 +55,12 @@ MacGrid::MacGrid(const MacGrid &grid) :
     _total_cells_(grid.width() * grid.height() * grid.depth()), _voxel_size_(grid.voxel_size()),
     _half_voxel_size_(grid.voxel_size() / 2.0), _particle_radius_(grid.particle_radius()),
     _w_to_v_(1.0 / grid.voxel_size()),
-    _sdf_sweep_count_((int)ceil(max(grid.width(), grid.height()) * .7))
-{
-    _sdf_ = new double[_total_cells_];
-    _pressure_ = new double[_total_cells_];
-    for(size_t dim = 0; dim < 3; dim++)
-    {
-        _u_[dim] = new double[_total_cells_];
-        _temp_u_[dim] = new double[_total_cells_];
-        _old_u_[dim] = new double[_total_cells_];
-        _w_[dim] = new double[_total_cells_];
-    }
-    _layer_ = new int[_total_cells_];
-    _type_ = new CellType[_total_cells_];
+    _sdf_sweep_count_((int)ceil(max(grid.width(), grid.height()) * .7)),
+    _sdf_(grid._sdf_), _pressure_(grid._pressure_), _u_(grid._u_),
+    _old_u_(grid._old_u_), _temp_u_(grid._temp_u_), _w_(grid._w_),
+    _layer_(grid._layer_), _type_(grid._type_)
+{ }
 
-    for(size_t dim = 0; dim < 2; dim++)
-    {
-        for(size_t i = 0; i < _total_cells_; i++)
-        {
-            _u_[dim][i] = grid.u(dim, i);
-        }
-    }
-
-    for(size_t i = 0; i < _total_cells_; i++)
-    {
-        _sdf_[i] = grid.sdf(0);
-        _layer_[i] = grid.layer(i);
-    }
-}
-
-//Deletes this MacGrid and any associated data.
-MacGrid::~MacGrid()
-{
-    delete[] _sdf_;
-    delete[] _pressure_;
-    for(size_t dim = 0; dim < 3; dim++)
-    {
-        delete[] _u_[dim];
-        delete[] _temp_u_[dim];
-        delete[] _old_u_[dim];
-        delete[] _w_[dim];
-    }
-    delete[] _layer_;
-    delete[] _type_;
-}
 
 void MacGrid::set_width(size_t width)
 {
@@ -561,7 +524,7 @@ void MacGrid::pvel_to_grid(const vector<UT_Vector3>& p_positions,
 //Updates the provided particle velocities with the velocity field stored in this MacGrid as
 //as part of FLIP algorithm.
 void MacGrid::grid_to_pvel(vector<UT_Vector3>& p_positions, vector<UT_Vector3>& p_velocities,
-                           double flip_ratio) const
+                           double flip_ratio)
 {
     //compute the difference between u and old u and store it in temp u
     for(size_t dim = 0; dim < 2; dim++)
