@@ -348,15 +348,15 @@ void SOP_Flipsim::_reset_simulator(void)
     if(_simulator_)
         delete _simulator_;
 
-    MacGrid *grid = new MacGrid(x_dim, y_dim, z_dim, v_size, p_rad);
+    MacGrid grid(x_dim, y_dim, z_dim, v_size, p_rad);
+    _ip_count_ = grid.total_cells() * 84;
 
     double st_const = STCONST();
     UT_Vector3 gravity(XGRAV(), YGRAV(), ZGRAV());
     double flip_ratio = FLIPRATIO();
 
-    _simulator_ = new Simulator(grid, gravity, st_const, flip_ratio);
+    _simulator_ = new Simulator(std::move(grid), gravity, st_const, flip_ratio);
 
-    _ip_count_ = grid->total_cells() * 84;
     for(size_t i = 0; i < _ip_count_; ++i)
     {
         _interp_particles_[i][0] = fRand(0.0, x_dim);

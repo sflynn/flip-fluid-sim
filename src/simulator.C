@@ -16,11 +16,11 @@ const double EPSILON = .00001;
 const double FLUID_DENSITY = 1.0;
 
 //Constructs a Simulator object.
-Simulator::Simulator(MacGrid *grid, UT_Vector3 gravity, double st_const,
+Simulator::Simulator(MacGrid grid, UT_Vector3 gravity, double st_const,
                      double flip_ratio) : 
     _gravity_(gravity), _st_const_(st_const), _flip_ratio_(flip_ratio)
 {
-    _grids_.push_back(grid);
+    _grids_.emplace_back(std::move(grid));
     _particle_positions_.emplace_back();
     _particle_velocities_.emplace_back();
 
@@ -28,13 +28,6 @@ Simulator::Simulator(MacGrid *grid, UT_Vector3 gravity, double st_const,
     fill_box_with_particles(12, 18, 22, 28, 0, 0, init_vel1, 0);
     UT_Vector3 init_vel2(fRand(-2.0, 2.0), fRand(-2.0, 2.0), 0.0);
     fill_box_with_particles(46, 52, 22, 28, 0, 0, init_vel2, 0);
-}
-
-//Deletes this Simulator and any associated data.
-Simulator::~Simulator()
-{
-    for(int i = 0; i < _grids_.size(); i++)
-        delete _grids_[i];
 }
 
 //Simulates and caches the FLIP fluid up until the specified frame or returns if the simulation
@@ -48,39 +41,38 @@ void Simulator::simulate_flip_to_frame(size_t frame)
     size_t end_frame = frame;
     double cur_time = start_frame;
     double max_u, ts;
-    MacGrid *grid;
     vector<UT_Vector3> particle_positions;
     vector<UT_Vector3> particle_velocities;
     
     for(size_t f = start_frame; f < end_frame; f++)
     {
-        grid = new MacGrid(*(_grids_[f]));
+        MacGrid grid = _grids_[f];
         particle_positions = _particle_positions_[f];
         particle_velocities = _particle_velocities_[f];
 
         while(cur_time < f + 1)
         {
-            max_u = grid->max_u();
-            ts = grid->voxel_size() / max_u;
+            max_u = grid.max_u();
+            ts = grid.voxel_size() / max_u;
             ts = min(f + 1 - cur_time, ts);
 
-            grid->advect_particles(particle_positions, ts);
-            grid->enforce_particle_bounds(particle_positions, particle_velocities);
-            grid->compute_sdf(particle_positions);
-            grid->update_buffer(1, particle_positions);
+            grid.advect_particles(particle_positions, ts);
+            grid.enforce_particle_bounds(particle_positions, particle_velocities);
+            grid.compute_sdf(particle_positions);
+            grid.update_buffer(1, particle_positions);
             apply_gravity_to_particles(particle_velocities, ts);
-            grid->pvel_to_grid(particle_positions, particle_velocities);
-            grid->set_boundary_velocities();
-            grid->extrapolate_velocity(4);
-            grid->set_boundary_velocities();
-            grid->pressure_projection(FLUID_DENSITY, _st_const_, ts);
-            grid->extrapolate_velocity(4);
-            grid->set_boundary_velocities();
-            grid->grid_to_pvel(particle_positions, particle_velocities, _flip_ratio_);
-            
+            grid.pvel_to_grid(particle_positions, particle_velocities);
+            grid.set_boundary_velocities();
+            grid.extrapolate_velocity(4);
+            grid.set_boundary_velocities();
+            grid.pressure_projection(FLUID_DENSITY, _st_const_, ts);
+            grid.extrapolate_velocity(4);
+            grid.set_boundary_velocities();
+            grid.grid_to_pvel(particle_positions, particle_velocities, _flip_ratio_);
+
             cur_time += ts;
         }
-        _grids_.push_back(grid);
+        _grids_.emplace_back(std::move(grid));
         _particle_positions_.push_back(particle_positions);
         _particle_velocities_.push_back(particle_velocities);
     }

@@ -12,6 +12,7 @@
 #include <stdio.h>
 #include <iostream>
 #include <math.h>
+#include <memory>
 #include <fstream>
 
 #include "macgrid.h"
@@ -35,12 +36,7 @@ public:
     * @param st_const The surface tension constant.
     * @param flip_ration The flip to pic ratio.
     */
-    Simulator(MacGrid *grid, UT_Vector3 gravity, double st_const, double flip_ratio);
-
-    /**
-    * Deletes this Simulator and any associated data.
-    */
-    virtual ~Simulator();
+    Simulator(MacGrid grid, UT_Vector3 gravity, double st_const, double flip_ratio);
 
     /**
     * Getter methods
@@ -48,9 +44,9 @@ public:
     const UT_Vector3& get_gravity(void) { return _gravity_; }
     double get_st_const(void) { return _st_const_; }
     double get_flip_ratio(void) { return _flip_ratio_; }
-    const MacGrid* get_grid(void) { return _grids_[_grids_.size() - 1]; }
+    const MacGrid* get_grid(void) { return &(_grids_[_grids_.size() - 1]); }
     const MacGrid* get_grid(size_t frame)
-        { simulate_flip_to_frame(frame); return _grids_[frame]; }
+        { simulate_flip_to_frame(frame); return &(_grids_[frame]); }
     const std::vector<std::vector<UT_Vector3>>& get_particle_positions(void) { return _particle_positions_; }
     const std::vector<std::vector<UT_Vector3>>& get_particle_velocities(void) { return _particle_velocities_; }
     const std::vector<UT_Vector3>& get_particle_positions(size_t frame)
@@ -124,7 +120,7 @@ private:
     double _flip_ratio_;
 
     //vector of cached simulation grids
-    std::vector<MacGrid*> _grids_;
+    std::vector<MacGrid> _grids_;
 
     //vector of cached particles
     std::vector<std::vector<UT_Vector3>> _particle_positions_;
