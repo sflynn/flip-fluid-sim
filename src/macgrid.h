@@ -320,9 +320,9 @@ private:
     std::vector<CellType> _type_;
 
     //pressure solve variables
-    Eigen::SparseMatrix<double>* _A_;
-    Eigen::VectorXd* _p_;
-    Eigen::VectorXd* _b_;
+    Eigen::SparseMatrix<double> _A_;
+    Eigen::VectorXd _p_;
+    Eigen::VectorXd _b_;
 
     /**
     * Using the current configuration of the grid, the pressure field is computed and stored in

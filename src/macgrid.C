@@ -164,19 +164,19 @@ void MacGrid::_solve_pressure_matrix(void)
     //cout << "Pressure solve matrix-------------------------" << endl;
 
     //cout << "left hand side: " << endl;
-    //cout << *(this->_A_) << endl;
+    //cout << _A_ << endl;
 
     //cout << "right hand side: " << endl;
-    //cout << *(this->_b_) << endl;
+    //cout << _b_ << endl;
 
     //cout << "\t\t\tMatrix solve..." << endl;
 
     Eigen::ConjugateGradient<Eigen::SparseMatrix<double> > cg;
-    cg.compute(*this->_A_);
-    *this->_p_ = cg.solve(*this->_b_);
+    cg.compute(_A_);
+    _p_ = cg.solve(_b_);
 
     //cout << "result: \n" << endl;
-    //cout << *(this->_p_) << endl;
+    //cout << _p_ << endl;
 
     //cout << "----------------------------------------------" << endl;
 
@@ -213,7 +213,7 @@ void MacGrid::_build_pressure_matrix(double d, double st_const)
                 ++non_solid_neighbors;
                 if(_type_[n_indices[n]] == FLUID)
                 {
-                    _A_->coeffRef(_layer_[index], _layer_[n_indices[n]]) = 1;
+                    _A_.coeffRef(_layer_[index], _layer_[n_indices[n]]) = 1;
                 }
                 else
                 {
@@ -250,9 +250,9 @@ void MacGrid::_build_pressure_matrix(double d, double st_const)
             }
 
             double val = (non_solid_neighbors * -1.0) + (ghost / _sdf_[index]);
-            _A_->coeffRef(_layer_[index], _layer_[index]) = val;
+            _A_.coeffRef(_layer_[index], _layer_[index]) = val;
             divergence = compute_divergence(i, j);
-            _b_->operator()(_layer_[index]) = (d * divergence) - rhs;
+            _b_(_layer_[index]) = (d * divergence) - rhs;
         }
     }
 }
@@ -274,18 +274,14 @@ void MacGrid::_compute_pressures(double d, double st_const)
     size_t fluid_cell_count = _label_fluid_cells();
 
     //allocate memory for matrix solve
-    _A_ = new Eigen::SparseMatrix<double>(fluid_cell_count, fluid_cell_count);
-    _p_ = new Eigen::VectorXd(fluid_cell_count);
-    _b_ = new Eigen::VectorXd(fluid_cell_count);
-    _A_->reserve(Eigen::VectorXi::Constant(fluid_cell_count, 20));
+    _A_ = Eigen::SparseMatrix<double>(fluid_cell_count, fluid_cell_count);
+    _p_ = Eigen::VectorXd(fluid_cell_count);
+    _b_ = Eigen::VectorXd(fluid_cell_count);
+    _A_.reserve(Eigen::VectorXi::Constant(fluid_cell_count, 20));
 
     _build_pressure_matrix(d, st_const);
     _solve_pressure_matrix();
     _store_pressures();
-
-    delete _A_;
-    delete _p_;
-    delete _b_;
 }
 
 //Subtracts the gradient of the pressure field from the velocity field.
@@ -293,7 +289,7 @@ void MacGrid::_store_pressures(void)
 {
     for(size_t index = 0; index < _total_cells_; index++)
         if(_layer_[index] != -1)
-            _pressure_[index] = (double)(*_p_)[_layer_[index]];
+            _pressure_[index] = (double)_p_[_layer_[index]];
 }
 
 //Subtracts the gradient of the pressure field from the velocity field.
