@@ -10,6 +10,8 @@
 #include <GU/GU_Detail.h>
 #include <GEO/GEO_PrimPart.h>
 
+using namespace std;
+
 //constants
 const int LARGE_NUMBER = 1000000000;
 const int LARGE_NEG_NUMBER = LARGE_NUMBER * -1;
@@ -17,107 +19,57 @@ const double EPSILON = .00001;
 const double THETA_MIN = .03;
 
 //Generates a random double between fMin and fMax
-double fRand(const double fMin, const double fMax)
+double fRand(double fMin, double fMax)
 {
     double f = (double)rand() / RAND_MAX;
     return fMin + f * (fMax - fMin);
 }
 
+auto array_of_vecs = [] (size_t count) {
+        return std::array<std::vector<double>, 3>{
+                std::vector<double>(count), std::vector<double>(count),
+                std::vector<double>(count) };
+    };
+
+
 //Constructs a MacGrid object.
-MacGrid::MacGrid(const size_t width, const size_t height, const size_t depth,
-                 const double voxel_size, const double particle_radius) :
+MacGrid::MacGrid(size_t width, size_t height, size_t depth,
+                 double voxel_size, double particle_radius) :
         _width_(width), _height_(height), _depth_(depth), _total_cells_(width * height * depth),
         _voxel_size_(voxel_size), _half_voxel_size_(voxel_size / 2.0),
         _particle_radius_(particle_radius), _w_to_v_(1.0 / voxel_size),
-        _sdf_sweep_count_((int)ceil(max(width, height) * .7))
+        _sdf_sweep_count_((int)ceil(max(width, height) * .7)),
+        _sdf_(_total_cells_), _pressure_(_total_cells_),
+        _u_(array_of_vecs(_total_cells_)),
+        _old_u_(array_of_vecs(_total_cells_)),
+        _temp_u_(array_of_vecs(_total_cells_)),
+        _w_(array_of_vecs(_total_cells_)),
+        _layer_(_total_cells_), _type_(_total_cells_)
 {
-    _sdf_ = new double[_total_cells_];
-    _pressure_ = new double[_total_cells_];
-    for(size_t dim = 0; dim < 3; dim++)
-    {
-        _u_[dim] = new double[_total_cells_];
-        _temp_u_[dim] = new double[_total_cells_];
-        _old_u_[dim] = new double[_total_cells_];
-        _w_[dim] = new double[_total_cells_];
-    }
-    _layer_ = new int[_total_cells_];
-    _type_ = new CellType[_total_cells_];
-
     _reset_grid();
 }
 
-//Constructs a MacGrid that is a copy of the input MacGrid.
-MacGrid::MacGrid(const MacGrid &grid) :
-    _width_(grid.width()), _height_(grid.height()), _depth_(grid.depth()),
-    _total_cells_(grid.width() * grid.height() * grid.depth()), _voxel_size_(grid.voxel_size()),
-    _half_voxel_size_(grid.voxel_size() / 2.0), _particle_radius_(grid.particle_radius()),
-    _w_to_v_(1.0 / grid.voxel_size()),
-    _sdf_sweep_count_((int)ceil(max(grid.width(), grid.height()) * .7))
-{
-    _sdf_ = new double[_total_cells_];
-    _pressure_ = new double[_total_cells_];
-    for(size_t dim = 0; dim < 3; dim++)
-    {
-        _u_[dim] = new double[_total_cells_];
-        _temp_u_[dim] = new double[_total_cells_];
-        _old_u_[dim] = new double[_total_cells_];
-        _w_[dim] = new double[_total_cells_];
-    }
-    _layer_ = new int[_total_cells_];
-    _type_ = new CellType[_total_cells_];
-
-    for(size_t dim = 0; dim < 2; dim++)
-    {
-        for(size_t i = 0; i < _total_cells_; i++)
-        {
-            _u_[dim][i] = grid.u(dim, i);
-        }
-    }
-
-    for(size_t i = 0; i < _total_cells_; i++)
-    {
-        _sdf_[i] = grid.sdf(0);
-        _layer_[i] = grid.layer(i);
-    }
-}
-
-//Deletes this MacGrid and any associated data.
-MacGrid::~MacGrid()
-{
-    delete[] _sdf_;
-    delete[] _pressure_;
-    for(size_t dim = 0; dim < 3; dim++)
-    {
-        delete[] _u_[dim];
-        delete[] _temp_u_[dim];
-        delete[] _old_u_[dim];
-        delete[] _w_[dim];
-    }
-    delete[] _layer_;
-    delete[] _type_;
-}
-
-void MacGrid::set_width(const size_t width)
+void MacGrid::set_width(size_t width)
 {
     _width_ = width;
     _total_cells_ = _width_ * _height_ * _depth_;
 }
 
-void MacGrid::set_height(const size_t height)
+void MacGrid::set_height(size_t height)
 {
     _height_ = height;
     _total_cells_ = _width_ * _height_ * _depth_;
 }
 
-void MacGrid::set_depth(const size_t depth)
+void MacGrid::set_depth(size_t depth)
 {
     _depth_ = depth;
     _total_cells_ = _width_ * _height_ * _depth_;
 }
 
 //Linearly interpolates a velocity vector at the specified position on the MacGrid.
-void MacGrid::get_velocity(const double x, const double y, const double z,
-                           const VelocityType u_type, UT_Vector3& result) const
+void MacGrid::get_velocity(double x, double y, double z,
+                           VelocityType u_type, UT_Vector3& result) const
 {
     double hdx = max(x - _half_voxel_size_, 0.0);
     double hdy = max(y - _half_voxel_size_, 0.0);
@@ -148,7 +100,7 @@ void MacGrid::get_velocity(const double x, const double y, const double z,
 
 //Trace a particle at a specified position using the MacGrid's current velocity field to the
 //resulting position.
-void MacGrid::trace_particle(const UT_Vector3& pos, const double t, UT_Vector3& result) const
+void MacGrid::trace_particle(const UT_Vector3& pos, double t, UT_Vector3& result) const
 {
     //RK2
     UT_Vector3 vel;
@@ -162,7 +114,7 @@ void MacGrid::trace_particle(const UT_Vector3& pos, const double t, UT_Vector3& 
 }
 
 //Advect particles using the MacGrid's current velocity field to new positions.
-void MacGrid::advect_particles(vector<UT_Vector3>& particles, const double t) const
+void MacGrid::advect_particles(vector<UT_Vector3>& particles, double t) const
 {
     //TODO: make this parallel
     for(size_t i = 0; i < particles.size(); i++)
@@ -176,7 +128,7 @@ void MacGrid::advect_particles(vector<UT_Vector3>& particles, const double t) co
 }
 
 //Applies the specified gravity force uniformly to the fluid cells in the MacGrid.
-void MacGrid::apply_gravity_forces(const double gravity, const double t)
+void MacGrid::apply_gravity_forces(double gravity, double t)
 {
     int index;
     double vg = gravity * t;
@@ -212,19 +164,19 @@ void MacGrid::_solve_pressure_matrix(void)
     //cout << "Pressure solve matrix-------------------------" << endl;
 
     //cout << "left hand side: " << endl;
-    //cout << *(this->_A_) << endl;
+    //cout << _A_ << endl;
 
     //cout << "right hand side: " << endl;
-    //cout << *(this->_b_) << endl;
+    //cout << _b_ << endl;
 
     //cout << "\t\t\tMatrix solve..." << endl;
 
     Eigen::ConjugateGradient<Eigen::SparseMatrix<double> > cg;
-    cg.compute(*this->_A_);
-    *this->_p_ = cg.solve(*this->_b_);
+    cg.compute(_A_);
+    _p_ = cg.solve(_b_);
 
     //cout << "result: \n" << endl;
-    //cout << *(this->_p_) << endl;
+    //cout << _p_ << endl;
 
     //cout << "----------------------------------------------" << endl;
 
@@ -233,7 +185,7 @@ void MacGrid::_solve_pressure_matrix(void)
 }
 
 //Builds the pressure solve matrix _A_ with the current configuration of the MacGrid.
-void MacGrid::_build_pressure_matrix(const double d, const double st_const)
+void MacGrid::_build_pressure_matrix(double d, double st_const)
 {
     double ghost, g_p, rhs, theta, k, divergence, x, y;
     size_t non_solid_neighbors;
@@ -261,7 +213,7 @@ void MacGrid::_build_pressure_matrix(const double d, const double st_const)
                 ++non_solid_neighbors;
                 if(_type_[n_indices[n]] == FLUID)
                 {
-                    _A_->coeffRef(_layer_[index], _layer_[n_indices[n]]) = 1;
+                    _A_.coeffRef(_layer_[index], _layer_[n_indices[n]]) = 1;
                 }
                 else
                 {
@@ -298,9 +250,9 @@ void MacGrid::_build_pressure_matrix(const double d, const double st_const)
             }
 
             double val = (non_solid_neighbors * -1.0) + (ghost / _sdf_[index]);
-            _A_->coeffRef(_layer_[index], _layer_[index]) = val;
+            _A_.coeffRef(_layer_[index], _layer_[index]) = val;
             divergence = compute_divergence(i, j);
-            _b_->operator()(_layer_[index]) = (d * divergence) - rhs;
+            _b_(_layer_[index]) = (d * divergence) - rhs;
         }
     }
 }
@@ -317,23 +269,19 @@ void MacGrid::pressure_projection(double fluid_density, double st_const, double 
 
 //Using the current configuration of the grid, the pressure field is computed and stored in the
 //grid.
-void MacGrid::_compute_pressures(const double d, const double st_const)
+void MacGrid::_compute_pressures(double d, double st_const)
 {
     size_t fluid_cell_count = _label_fluid_cells();
 
     //allocate memory for matrix solve
-    _A_ = new Eigen::SparseMatrix<double>(fluid_cell_count, fluid_cell_count);
-    _p_ = new Eigen::VectorXd(fluid_cell_count);
-    _b_ = new Eigen::VectorXd(fluid_cell_count);
-    _A_->reserve(Eigen::VectorXi::Constant(fluid_cell_count, 20));
+    _A_ = Eigen::SparseMatrix<double>(fluid_cell_count, fluid_cell_count);
+    _p_ = Eigen::VectorXd(fluid_cell_count);
+    _b_ = Eigen::VectorXd(fluid_cell_count);
+    _A_.reserve(Eigen::VectorXi::Constant(fluid_cell_count, 20));
 
     _build_pressure_matrix(d, st_const);
     _solve_pressure_matrix();
     _store_pressures();
-
-    delete _A_;
-    delete _p_;
-    delete _b_;
 }
 
 //Subtracts the gradient of the pressure field from the velocity field.
@@ -341,11 +289,11 @@ void MacGrid::_store_pressures(void)
 {
     for(size_t index = 0; index < _total_cells_; index++)
         if(_layer_[index] != -1)
-            _pressure_[index] = (double)(*_p_)[_layer_[index]];
+            _pressure_[index] = (double)_p_[_layer_[index]];
 }
 
 //Subtracts the gradient of the pressure field from the velocity field.
-void MacGrid::_apply_pressure_gradient(const double d, const double st_const)
+void MacGrid::_apply_pressure_gradient(double d, double st_const)
 {
     int index, n_index;
     double p_for, p_back, theta, k, grad;
@@ -463,7 +411,7 @@ void MacGrid::set_boundary_velocities(void)
 }
 
 //Extrapolates the velocity in fluid cells into the surrounding cells.
-void MacGrid::extrapolate_velocity(const size_t kcfl)
+void MacGrid::extrapolate_velocity(size_t kcfl)
 {
     double avg_u[3];
     size_t u_counts[3];
@@ -559,7 +507,7 @@ void MacGrid::pvel_to_grid(const vector<UT_Vector3>& p_positions,
 //Updates the provided particle velocities with the velocity field stored in this MacGrid as
 //as part of FLIP algorithm.
 void MacGrid::grid_to_pvel(vector<UT_Vector3>& p_positions, vector<UT_Vector3>& p_velocities,
-                           double flip_ratio) const
+                           double flip_ratio)
 {
     //compute the difference between u and old u and store it in temp u
     for(size_t dim = 0; dim < 2; dim++)
@@ -617,7 +565,7 @@ void MacGrid::_swap_temp_u(void)
 }
 
 //Gets the voxel indices of the 4 neighbors to the provided index.
-void MacGrid::_get_neighbor_indices(const size_t index, int* indices) const
+void MacGrid::_get_neighbor_indices(size_t index, int* indices) const
 {
     size_t j = floor((double)index / (double)_width_);
     size_t i = index - j * _width_;
@@ -625,7 +573,7 @@ void MacGrid::_get_neighbor_indices(const size_t index, int* indices) const
 }
 
 //Gets the voxel indices of the 4 neighbors to the provided location.
-void MacGrid::_get_neighbor_indices(const size_t i, const size_t j, int* indices) const
+void MacGrid::_get_neighbor_indices(size_t i, size_t j, int* indices) const
 {
     if(i > 0)
         indices[0] = index_1D(i - 1, j);
@@ -642,8 +590,8 @@ void MacGrid::_get_neighbor_indices(const size_t i, const size_t j, int* indices
 }
 
 //Gets the index of the neighbor given a dimension and direction (negative or positive).
-int MacGrid::_get_neighbor_index(const size_t i, const size_t j,
-                                 const size_t dim, const bool neg) const
+int MacGrid::_get_neighbor_index(size_t i, size_t j,
+                                 size_t dim, bool neg) const
 {
     if(dim == 0)
     {
@@ -664,7 +612,7 @@ int MacGrid::_get_neighbor_index(const size_t i, const size_t j,
 
 //Updates the cell types in this MacGrid to reflect the provided particles including building a
 //buffer of air cells around the fluid cells.
-void MacGrid::update_buffer(const int kcfl, const vector<UT_Vector3>& particles)
+void MacGrid::update_buffer(int kcfl, const vector<UT_Vector3>& particles)
 {
     _set_layer_all(-1);
 
@@ -712,14 +660,14 @@ void MacGrid::update_buffer(const int kcfl, const vector<UT_Vector3>& particles)
 }
 
 //Set the layer field for all cells in the grid.
-void MacGrid::_set_layer_all(const int layer)
+void MacGrid::_set_layer_all(int layer)
 {
     for(size_t i = 0; i < _total_cells_; i++)
         _layer_[i] = layer;
 }
 
 //Computes the divergence of the velocity at the given index.
-double MacGrid::compute_divergence(const size_t i, const size_t j) const
+double MacGrid::compute_divergence(size_t i, size_t j) const
 {
     int index = index_1D(i, j);
     int n;
@@ -752,7 +700,7 @@ double MacGrid::compute_divergence(const size_t i, const size_t j) const
 }
 
 //Computes the mean curvature of the signed distance field at the given index.
-double MacGrid::compute_curvature(const double x, const double y) const
+double MacGrid::compute_curvature(double x, double y) const
 {
     double sd, sdl, sdr, sdd, sdu;
 
@@ -787,8 +735,8 @@ double MacGrid::get_pressure(double x, double y) const
 }
 
 //Interpolates a scalar value of a specified type at the desired position.
-double MacGrid::_get_interp_val(const double x, const double y, const double z,
-                                const ScalarType type) const
+double MacGrid::_get_interp_val(double x, double y, double z,
+                                ScalarType type) const
 {
     double weights[4];
     _get_interp_weights(x, y, z, weights);
@@ -807,8 +755,8 @@ double MacGrid::_get_interp_val(const double x, const double y, const double z,
 }
 
 //Gets the scalars of a specified type on the grid at the specified voxel indices.
-void MacGrid::_get_interp_scalars(const size_t i, const size_t j, const size_t k,
-                                  const ScalarType type, double* result) const
+void MacGrid::_get_interp_scalars(size_t i, size_t j, size_t k,
+                                  ScalarType type, double* result) const
 {
     if(type == SD || type == PRESSURE)
     {
@@ -945,7 +893,7 @@ void MacGrid::_get_interp_scalars(const size_t i, const size_t j, const size_t k
 }
 
 //Get the interpolation weights given a position in Houdini units.
-void MacGrid::_get_interp_weights(const double x, const double y, const double z,
+void MacGrid::_get_interp_weights(double x, double y, double z,
                                   double* result) const
 {
     int i = floor(x);
@@ -1074,7 +1022,7 @@ void MacGrid::compute_sdf(const vector<UT_Vector3>& particles)
 
 //Propagates the signed distance field given an initialized signed distance field. This is
 //part of the signed distance field computation.
-void MacGrid::_sweep_sdf(const size_t iterations, const bool neg)
+void MacGrid::_sweep_sdf(size_t iterations, bool neg)
 {
     size_t index;
 
@@ -1131,7 +1079,7 @@ void MacGrid::_sweep_sdf(const size_t iterations, const bool neg)
 }
 
 //Checks if the specified voxel has a neighbor in the desired layer.
-bool MacGrid::_has_neighbor_in_layer(const size_t i, const size_t j, const int mlayer) const
+bool MacGrid::_has_neighbor_in_layer(size_t i, size_t j, int mlayer) const
 {
     if(i > 0)
         if(layer(i - 1, j) == mlayer)
@@ -1153,7 +1101,7 @@ bool MacGrid::_has_neighbor_in_layer(const size_t i, const size_t j, const int m
 }
 
 //Returns the minimum signed distance value in a neighbor to voxel i, j in layer mlayer.
-double MacGrid::_min_neighbor_sdf_in_layer(const size_t i, const size_t j, const int mlayer) const
+double MacGrid::_min_neighbor_sdf_in_layer(size_t i, size_t j, int mlayer) const
 {
     double min = LARGE_NUMBER;
     double d;
@@ -1202,7 +1150,7 @@ double MacGrid::_min_neighbor_sdf_in_layer(const size_t i, const size_t j, const
 }
 
 //Returns the maximum signed distance value in a neighbor to voxel i, j in layer mlayer.
-double MacGrid::_max_neighbor_sdf_in_layer(const size_t i, const size_t j, const int mlayer) const
+double MacGrid::_max_neighbor_sdf_in_layer(size_t i, size_t j, int mlayer) const
 {
     double max = LARGE_NEG_NUMBER;
     double d;

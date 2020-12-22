@@ -17,10 +17,6 @@
 #include <eigen3/Eigen/Sparse>
 #include <SOP/SOP_Node.h>
 
-using namespace std;
-
-class GEO_PrimParticle;
-
 //The types of scalars that can be stored in a MacGrid, allows interpolation code reuse.
 enum ScalarType {UX, UY, UZ, UX_TEMP, UY_TEMP, UZ_TEMP, U, SD, CURV, PRESSURE};
 
@@ -49,20 +45,8 @@ public:
     * @param voxel_size The width of an individual voxel in world units.
     * @param particle_radius The radius of FLIP particles in world units.
     */
-    MacGrid(const size_t width, const size_t height, const size_t depth,
-            const double voxel_size, const double particle_radius);
-
-    /**
-    * Constructs a MacGrid that is a copy of the input MacGrid.
-    * 
-    * @param grid The MacGrid to copy.
-    */
-    MacGrid(const MacGrid &grid);
-
-    /**
-    * Deletes this MacGrid and any associated data.
-    */
-    virtual ~MacGrid();
+    MacGrid(size_t width, size_t height, size_t depth,
+            double voxel_size, double particle_radius);
 
     /**
     * Getter methods
@@ -73,55 +57,55 @@ public:
     size_t total_cells(void) const { return _total_cells_; }
     double voxel_size(void) const { return _voxel_size_; }
     double particle_radius(void) const { return _particle_radius_; }
-    double sdf(const size_t index) const { return _sdf_[index]; }
-    double sdf(const size_t i, const size_t j) const { return _sdf_[index_1D(i, j)]; }
-    double u(const size_t dim, const size_t index) const { return _u_[dim][index]; }
-    double u(const size_t dim, const size_t i, const size_t j) const
+    double sdf(size_t index) const { return _sdf_[index]; }
+    double sdf(size_t i, size_t j) const { return _sdf_[index_1D(i, j)]; }
+    double u(size_t dim, size_t index) const { return _u_[dim][index]; }
+    double u(size_t dim, size_t i, size_t j) const
         { return _u_[dim][index_1D(i, j)]; }
-    double old_u(const size_t dim, const size_t index) const { return _old_u_[dim][index]; }
-    double old_u(const size_t dim, const size_t i, const size_t j) const
+    double old_u(size_t dim, size_t index) const { return _old_u_[dim][index]; }
+    double old_u(size_t dim, size_t i, size_t j) const
         { return _old_u_[dim][index_1D(i, j)]; }
-    double temp_u(const size_t dim, const size_t index) const { return _temp_u_[dim][index]; }
-    double temp_u(const size_t dim, const size_t i, const size_t j) const
+    double temp_u(size_t dim, size_t index) const { return _temp_u_[dim][index]; }
+    double temp_u(size_t dim, size_t i, size_t j) const
         { return _temp_u_[dim][index_1D(i, j)]; }
-    double w(const size_t dim, const size_t index) const { return _w_[dim][index]; }
-    double w(const size_t dim, const size_t i, const size_t j) const
+    double w(size_t dim, size_t index) const { return _w_[dim][index]; }
+    double w(size_t dim, size_t i, size_t j) const
         { return _w_[dim][index_1D(i, j)]; }
-    double pressure(const size_t index) const { return _pressure_[index]; }
-    double pressure(const size_t i, const size_t j) const { return _pressure_[index_1D(i, j)]; }
-    double ux(const size_t index) const { return _u_[0][index]; }
-    double ux(const size_t i, const size_t j) const { return _u_[0][index_1D(i, j)]; }
-    double uy(const size_t index) const { return _u_[1][index]; }
-    double uy(const size_t i, const size_t j) const { return _u_[1][index_1D(i, j)]; }
-    double uz(const size_t index) const { return _u_[2][index]; }
-    double uz(const size_t i, const size_t j) const { return _u_[2][index_1D(i, j)]; }
-    int layer(const size_t index) const { return _layer_[index]; }
-    int layer(const size_t i, const size_t j) const { return _layer_[index_1D(i, j)]; }
-    CellType type(const size_t index) const { return _type_[index]; }
-    CellType type(const size_t i, const size_t j) const { return _type_[index_1D(i, j)]; }
+    double pressure(size_t index) const { return _pressure_[index]; }
+    double pressure(size_t i, size_t j) const { return _pressure_[index_1D(i, j)]; }
+    double ux(size_t index) const { return _u_[0][index]; }
+    double ux(size_t i, size_t j) const { return _u_[0][index_1D(i, j)]; }
+    double uy(size_t index) const { return _u_[1][index]; }
+    double uy(size_t i, size_t j) const { return _u_[1][index_1D(i, j)]; }
+    double uz(size_t index) const { return _u_[2][index]; }
+    double uz(size_t i, size_t j) const { return _u_[2][index_1D(i, j)]; }
+    int layer(size_t index) const { return _layer_[index]; }
+    int layer(size_t i, size_t j) const { return _layer_[index_1D(i, j)]; }
+    CellType type(size_t index) const { return _type_[index]; }
+    CellType type(size_t i, size_t j) const { return _type_[index_1D(i, j)]; }
 
     /**
     * Setter methods
     */
-    void set_width(const size_t width);
-    void set_height(const size_t height);
-    void set_depth(const size_t depth);
-    void set_u(const size_t dim, const size_t index, const double val) { _u_[dim][index] = val; }
-    void set_u(const size_t dim, const size_t i, const size_t j, const double val)
+    void set_width(size_t width);
+    void set_height(size_t height);
+    void set_depth(size_t depth);
+    void set_u(size_t dim, size_t index, double val) { _u_[dim][index] = val; }
+    void set_u(size_t dim, size_t i, size_t j, double val)
         { _u_[dim][index_1D(i, j)] = val; }
-    void set_old_u(const size_t dim, const size_t index, const double val)
+    void set_old_u(size_t dim, size_t index, double val)
         { _old_u_[dim][index] = val; } 
-    void set_old_u(const size_t dim, const size_t i, const size_t j, const double val)
+    void set_old_u(size_t dim, size_t i, size_t j, double val)
         { _old_u_[dim][index_1D(i, j)] = val; }
-    void set_temp_u(const size_t dim, const size_t index, const double val)
+    void set_temp_u(size_t dim, size_t index, double val)
         { _temp_u_[dim][index] = val; } 
-    void set_temp_u(const size_t dim, const size_t i, const size_t j,const double val)
+    void set_temp_u(size_t dim, size_t i, size_t j,double val)
         { _temp_u_[dim][index_1D(i, j)] = val; }
-    void set_w(const size_t dim, const size_t index, const double val) { _w_[dim][index] = val; }
-    void set_w(const size_t dim, const size_t i, const size_t j, const double val)
+    void set_w(size_t dim, size_t index, double val) { _w_[dim][index] = val; }
+    void set_w(size_t dim, size_t i, size_t j, double val)
         { _w_[dim][index_1D(i, j)] = val; }
-    void set_pressure(const size_t index, const double val) { _pressure_[index] = val; }
-    void set_pressure(const size_t i, const size_t j, const double val)
+    void set_pressure(size_t index, double val) { _pressure_[index] = val; }
+    void set_pressure(size_t i, size_t j, double val)
         { _pressure_[index_1D(i, j)] = val; }
 
     /**
@@ -132,7 +116,7 @@ public:
     * @param j The index into the jth voxel in the y dimension.
     * @return The 1D index representing i, j.
     */
-    int index_1D(const size_t i, const size_t j) const
+    int index_1D(size_t i, size_t j) const
     {
         if(i >= _width_ || j >= _height_)
         {
@@ -152,8 +136,8 @@ public:
     * @param u_type The type of velocity to interpolate,
     * @param[out] result The resulting interpolated velocity will be stored here.
     */
-    void get_velocity(const double x, const double y, const double z,
-                      const VelocityType u_type, UT_Vector3& result) const;
+    void get_velocity(double x, double y, double z,
+                      VelocityType u_type, UT_Vector3& result) const;
 
     /**
     * Trace a particle at a specified position using the MacGrid's current velocity field to the
@@ -163,7 +147,7 @@ public:
     * @param t The timestep.
     * @param[out] result The resulting traced end position of the particle will be stored here.
     */
-    void trace_particle(const UT_Vector3& pos, const double t, UT_Vector3& result) const;
+    void trace_particle(const UT_Vector3& pos, double t, UT_Vector3& result) const;
 
     /**
     * Advect particles using the MacGrid's current velocity field to new positions.
@@ -172,7 +156,7 @@ public:
     *   with the resulting positions.
     * @param t The timestep.
     */
-    void advect_particles(vector<UT_Vector3>& particles, const double t) const;
+    void advect_particles(std::vector<UT_Vector3>& particles, double t) const;
 
     /**
     * Applies the specified gravity force uniformly to the fluid cells in the MacGrid.
@@ -180,7 +164,7 @@ public:
     * @param gravity The gravity force to apply in houdini units
     * @param t The timestep
     */
-    void apply_gravity_forces(const double gravity, const double t);
+    void apply_gravity_forces(double gravity, double t);
 
     /**
     * Computes the pressure field and subtracts it from the velocity field to ensure that the
@@ -190,7 +174,7 @@ public:
     * @param st_const The surface tension constant.
     * @param t The timestep
     */
-    void pressure_projection(const double fluid_density, const double st_const, const double t);
+    void pressure_projection(double fluid_density, double st_const, double t);
 
     /**
     * Checks that the provided particles are within the bounds of this MacGrid and that the
@@ -201,8 +185,8 @@ public:
     * @param[in,out] p_velocities The velocities of the particles to check. These velocities will
     *   modified if they point into the boundaries.
     */
-    void enforce_particle_bounds(vector<UT_Vector3>& p_positions,
-                                 vector<UT_Vector3>& p_velocities) const;
+    void enforce_particle_bounds(std::vector<UT_Vector3>& p_positions,
+                                 std::vector<UT_Vector3>& p_velocities) const;
 
     /**
     * Sets the velocities at the MacGrid boundaries to zero so that fluid will not flow into the
@@ -215,7 +199,7 @@ public:
     *
     * @param kcfl The size in number of voxels to build out the extrapolated velocity buffer.
     */
-    void extrapolate_velocity(const size_t kcfl);
+    void extrapolate_velocity(size_t kcfl);
 
     /**
     * Updates the MacGrid velocity field with the provided particle velocities as part of the FLIP
@@ -224,8 +208,8 @@ public:
     * @param p_positions The positions of the particles.
     * @param p_velocities The velocities of the particles to tranfer to the grid.
     */
-    void pvel_to_grid(const vector<UT_Vector3>& p_positions,
-                      const vector<UT_Vector3>& p_velocities);
+    void pvel_to_grid(const std::vector<UT_Vector3>& p_positions,
+                      const std::vector<UT_Vector3>& p_velocities);
 
     /**
     * Updates the provided particle velocities with the velocity field stored in this MacGrid as
@@ -235,8 +219,9 @@ public:
     * @param[out] p_velocities The particle velocities to be updated.
     * @param flip_ratio The ratio of flip to pic. This affects how inviscid the resulting fluid is.
     */
-    void grid_to_pvel(vector<UT_Vector3>& p_positions, vector<UT_Vector3>& p_velocities,
-                      double flip_ratio) const;
+    void grid_to_pvel(std::vector<UT_Vector3>& p_positions,
+                      std::vector<UT_Vector3>& p_velocities,
+                      double flip_ratio);
 
     /**
     * Updates the cell types in this MacGrid to reflect the provided particles including building a
@@ -246,7 +231,7 @@ public:
     *   fluid cells.
     * @param particles The fluid particles to update the grid with.
     */
-    void update_buffer(const int kcfl, const vector<UT_Vector3>& particles);
+    void update_buffer(int kcfl, const std::vector<UT_Vector3>& particles);
 
     /**
     * Computes the divergence of the velocity at the given index.
@@ -255,7 +240,7 @@ public:
     * @param j The index into the jth voxel in the y dimension.
     * @return The divergence of the velocity field at index i, j.
     */
-    double compute_divergence(const size_t i, const size_t j) const;
+    double compute_divergence(size_t i, size_t j) const;
 
     /**
     * Computes the mean curvature of the signed distance field at the given index.
@@ -264,7 +249,7 @@ public:
     * @param j The index into the jth voxel in the y dimension.
     * @return The mean curvature of the signed distance field at index i, j
     */
-    double compute_curvature(const double x, const double y) const;
+    double compute_curvature(double x, double y) const;
 
     /**
     * Interpolates the signed distance to the fluid surface at the provided position.
@@ -291,7 +276,7 @@ public:
     *
     * @param The FLIP particle locations that represent the fluid.
     */
-    void compute_sdf(const vector<UT_Vector3>& particles);
+    void compute_sdf(const std::vector<UT_Vector3>& particles);
 
     /**
     * Returns the maximum value of velocity in the MacGrid.
@@ -325,19 +310,19 @@ private:
     int _sdf_sweep_count_;
 
     //fields NOTE--the 3rd dimension in the vectors is unused in this 2D implementation
-    double* _sdf_;
-    double* _pressure_;
-    double* _u_[3];
-    double* _old_u_[3];
-    double* _temp_u_[3];
-    double* _w_[3];
-    int* _layer_;
-    CellType* _type_;
+    std::vector<double> _sdf_;
+    std::vector<double> _pressure_;
+    std::array<std::vector<double>, 3> _u_;
+    std::array<std::vector<double>, 3> _old_u_;
+    std::array<std::vector<double>, 3> _temp_u_;
+    std::array<std::vector<double>, 3> _w_;
+    std::vector<int> _layer_;
+    std::vector<CellType> _type_;
 
     //pressure solve variables
-    Eigen::SparseMatrix<double>* _A_;
-    Eigen::VectorXd* _p_;
-    Eigen::VectorXd* _b_;
+    Eigen::SparseMatrix<double> _A_;
+    Eigen::VectorXd _p_;
+    Eigen::VectorXd _b_;
 
     /**
     * Using the current configuration of the grid, the pressure field is computed and stored in
@@ -347,7 +332,7 @@ private:
     * @param st_const The surface tension constant.
     * @param t The timestep
     */
-    void _compute_pressures(const double d, const double st_const);
+    void _compute_pressures(double d, double st_const);
 
     /**
     * Stores the pressures in this MacGrid that have been previously computed in the _p_ vector.
@@ -360,7 +345,7 @@ private:
     * @param d The timestep / (fluid_density * _voxel_size_)
     * @param st_const The surface tension constant.
     */
-    void _apply_pressure_gradient(const double d, const double st_const);
+    void _apply_pressure_gradient(double d, double st_const);
 
     /**
     * Gives each fluid cell a label cooresponding to its row in the pressure solve matrix
@@ -380,7 +365,7 @@ private:
     * @param d (fluid_density * _voxel_size_) / timestep
     * @param st_const The surface tension constant
     */
-    void _build_pressure_matrix(const double d, const double st_const);
+    void _build_pressure_matrix(double d, double st_const);
 
     /**
     * Swaps the temporary velocity field. The values of _u_ will be set to the values currently in
@@ -400,7 +385,7 @@ private:
     * @param index The index to get the neighbors for.
     * @param[out] indices The array where the neighbor indices will be stored.
     */
-    void _get_neighbor_indices(const size_t index, int* indices) const;
+    void _get_neighbor_indices(size_t index, int* indices) const;
 
     /**
     * Gets the voxel indices of the 4 neighbors to the provided location.
@@ -409,7 +394,7 @@ private:
     * @param j The index into the jth voxel in the y dimension.
     * @param[out] indices The array where the neighbor voxel indices will be stored.
     */
-    void _get_neighbor_indices(const size_t i, const size_t j, int* indices) const;
+    void _get_neighbor_indices(size_t i, size_t j, int* indices) const;
 
     /**
     * Gets the index of the neighbor given a dimension and direction (negative or positive).
@@ -421,16 +406,14 @@ private:
     *   positive (false).
     * @return The neighbor index.
     */
-    int _get_neighbor_index(const size_t i, const size_t j, const size_t dim,
-                            const bool neg) const;
+    int _get_neighbor_index(size_t i, size_t j, size_t dim, bool neg) const;
 
     /**
     * Set the layer field for all cells in the grid.
     *
     * @param layer The value to set for the layer field for all cells.
     */
-    void _set_layer_all(const int layer);
-
+    void _set_layer_all(int layer);
     /**
     * Interpolates a scalar value of a specified type at the desired position.
     *
@@ -441,8 +424,8 @@ private:
     * @param type The type to interpolate.
     * @return The interpolated value.
     */
-    double _get_interp_val(const double x, const double y, const double z,
-                           const ScalarType type) const;
+    double _get_interp_val(double x, double y, double z,
+                           ScalarType type) const;
 
     /**
     * Gets the scalars of a specified type on the grid at the specified voxel indices.
@@ -454,8 +437,8 @@ private:
     * @param type The type of scalar to get.
     * @param[out] The array to store the resulting scalars in.
     */
-    void _get_interp_scalars(const size_t i, const size_t j, const size_t k,
-                             const ScalarType type, double* result) const;
+    void _get_interp_scalars(size_t i, size_t j, size_t k,
+                             ScalarType type, double* result) const;
 
     /**
     * Get the interpolation weights given a position in world units.
@@ -466,7 +449,7 @@ private:
     *   not used in this 2D implementation.
     * @param[out] result The array to store the resulting weights in.
     */
-    void _get_interp_weights(const double x, const double y, const double z, double* result) const;
+    void _get_interp_weights(double x, double y, double z, double* result) const;
 
     /**
     * Sets all the grid field values to default values.
@@ -486,7 +469,7 @@ private:
     * @param neg Flag indicating whether to propagate the sdf inside the surface (true) or 
     *   outside (false)
     */
-    void _sweep_sdf(const size_t iterations, const bool neg);
+    void _sweep_sdf(size_t iterations, bool neg);
 
     /**
     * Checks if the specified voxel has a neighbor in the desired layer.
@@ -496,7 +479,7 @@ private:
     * @param mlayer The layer to check for.
     * @return Whether voxel i, j has a neighbor in layer mylayer (true) or not (false)
     */
-    bool _has_neighbor_in_layer(const size_t i, const size_t j, const int mlayer) const;
+    bool _has_neighbor_in_layer(size_t i, size_t j, int mlayer) const;
 
     /**
     * Returns the minimum signed distance value in a neighbor to voxel i, j in layer mlayer.
@@ -506,7 +489,7 @@ private:
     * @param mlayer The layer to check for.
     * @return The minimum signed distance value in a neighbor to voxel i, j in layer mlayer,
     */
-    double _min_neighbor_sdf_in_layer(const size_t i, const size_t j, const int mlayer) const;
+    double _min_neighbor_sdf_in_layer(size_t i, size_t j, int mlayer) const;
 
     /**
     * Returns the maximum signed distance value in a neighbor to voxel i, j in layer mlayer.
@@ -516,11 +499,11 @@ private:
     * @param mlayer The layer to check for.
     * @return The maximum signed distance value in a neighbor to voxel i, j in layer mlayer,
     */
-    double _max_neighbor_sdf_in_layer(const size_t i, const size_t j, const int mlayer) const;
+    double _max_neighbor_sdf_in_layer(size_t i, size_t j, int mlayer) const;
 };
 
 
 //Generates a random double between fMin and fMax
-double fRand(const double fMin, const double fMax);
+double fRand(double fMin, double fMax);
 
 #endif /* MACGRID_H_ */
