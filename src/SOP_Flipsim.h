@@ -33,6 +33,8 @@
 #ifndef __SOP_Flipsim_h__
 #define __SOP_Flipsim_h__
 
+#include <memory>
+
 #include <SOP/SOP_Node.h>
 
 #include "macgrid.h"
@@ -58,11 +60,6 @@ public:
     * @param op Needed by HDK to initialize SOP_Node object
     */
     SOP_Flipsim(OP_Network *net, const char *name, OP_Operator *op);
-
-    /**
-    * Deletes this SOP_Flipsim and any associated data.
-    */
-    virtual ~SOP_Flipsim();
 
     //code provided by SOP_Node sample code
     static PRM_Template myTemplateList[];
@@ -97,7 +94,7 @@ private:
 
     //variables needed to create particles and polygons
     GEO_PrimParticle *_particle_system_;
-    Simulator* _simulator_;
+    std::unique_ptr<Simulator> _simulator_;
     UT_Vector3 _interp_particles_[10000000];
     size_t _ip_count_;
     UT_Vector3 _prev_source_pos_;

@@ -211,11 +211,6 @@ const char * SOP_Flipsim::inputLabel(unsigned idx) const
     }
 }
 
-//Deletes this SOP_Flipsim and any associated data.
-SOP_Flipsim::~SOP_Flipsim()
-{
-    delete _simulator_;
-}
 
 //Initializes this SOP_Flipsim.
 void SOP_Flipsim::initSystem()
@@ -345,9 +340,6 @@ void SOP_Flipsim::_reset_simulator(void)
     fpreal p_rad = PRADIUS();
     fpreal v_size = VSIZE();
 
-    if(_simulator_)
-        delete _simulator_;
-
     MacGrid grid(x_dim, y_dim, z_dim, v_size, p_rad);
     _ip_count_ = grid.total_cells() * 84;
 
@@ -355,7 +347,7 @@ void SOP_Flipsim::_reset_simulator(void)
     UT_Vector3 gravity(XGRAV(), YGRAV(), ZGRAV());
     double flip_ratio = FLIPRATIO();
 
-    _simulator_ = new Simulator(std::move(grid), gravity, st_const, flip_ratio);
+    _simulator_ = make_unique<Simulator>(std::move(grid), gravity, st_const, flip_ratio);
 
     for(size_t i = 0; i < _ip_count_; ++i)
     {
