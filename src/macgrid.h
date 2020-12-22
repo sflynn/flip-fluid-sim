@@ -49,18 +49,6 @@ public:
             double voxel_size, double particle_radius);
 
     /**
-    * Constructs a MacGrid that is a copy of the input MacGrid.
-    * 
-    * @param grid The MacGrid to copy.
-    */
-    MacGrid(const MacGrid &grid);
-
-    /**
-    * Deletes this MacGrid and any associated data.
-    */
-    virtual ~MacGrid() = default;
-
-    /**
     * Getter methods
     */
     size_t width(void) const { return _width_; }

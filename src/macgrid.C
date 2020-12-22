@@ -49,19 +49,6 @@ MacGrid::MacGrid(size_t width, size_t height, size_t depth,
     _reset_grid();
 }
 
-//Constructs a MacGrid that is a copy of the input MacGrid.
-MacGrid::MacGrid(const MacGrid &grid) :
-    _width_(grid.width()), _height_(grid.height()), _depth_(grid.depth()),
-    _total_cells_(grid.width() * grid.height() * grid.depth()), _voxel_size_(grid.voxel_size()),
-    _half_voxel_size_(grid.voxel_size() / 2.0), _particle_radius_(grid.particle_radius()),
-    _w_to_v_(1.0 / grid.voxel_size()),
-    _sdf_sweep_count_((int)ceil(max(grid.width(), grid.height()) * .7)),
-    _sdf_(grid._sdf_), _pressure_(grid._pressure_), _u_(grid._u_),
-    _old_u_(grid._old_u_), _temp_u_(grid._temp_u_), _w_(grid._w_),
-    _layer_(grid._layer_), _type_(grid._type_)
-{ }
-
-
 void MacGrid::set_width(size_t width)
 {
     _width_ = width;
